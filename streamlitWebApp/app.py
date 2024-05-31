@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
 
 
+
 # Function to load data
 def load_data(uploaded_file):
     return pd.read_csv(uploaded_file)
@@ -128,23 +129,24 @@ def t_sne_visualization(data, target_variable=None, perplexity=30, learning_rate
     ax.grid()
     st.pyplot(fig)
 
-# spliting data
+# Function to split data
 def split_data(X, y):
     return train_test_split(X, y, test_size=0.3, random_state=42)
 
 
-# selecting a classifier
+# Function to select a classifier
 def select_classifier():
     return RandomForestClassifier()
 
 
-# encode categorical y
+
+# Function to encode categorical y
 def encode_categorical_y(y_train, y_test):
     label_encoder = LabelEncoder()
     y_train_encoded = label_encoder.fit_transform(y_train)
     y_test_encoded = label_encoder.transform(y_test)
     return y_train_encoded, y_test_encoded
-
+#
 def train_and_evaluate_classifier(classifier, X_train, y_train, X_test, y_test):
     y_train_encoded, y_test_encoded = encode_categorical_y(y_train, y_test)
 
@@ -170,11 +172,11 @@ def train_and_evaluate_classifier(classifier, X_train, y_train, X_test, y_test):
         "roc_auc": roc_auc,
         
     }
-def perform_clustering(algorithm, X, **kwargs):  # Added **kwargs to capture additional parameters
+def perform_clustering(algorithm, X, **kwargs):#
     if algorithm == "KMeans":
-        model = KMeans(**kwargs) # Pass kwargs to KMeans
+        model = KMeans(**kwargs) #
     else:
-        model = AgglomerativeClustering(**kwargs)  # Pass kwargs to AgglomerativeClustering
+        model = AgglomerativeClustering(**kwargs)  #
     clusters = model.fit_predict(X)
     return model, clusters
 
@@ -204,7 +206,6 @@ def evaluate_clustering(X, clusters, y_true):
         "rand_index": rand_index
     }
 
-
 def display_clustering_results(results):
    
     st.write(f"- Silhouette Score: {results['silhouette_score']:.4f}")
@@ -216,6 +217,7 @@ def display_clustering_results(results):
     
 
 
+# Function to display classification results
 def display_classification_results(results):
     st.write(f"Accuracy: {results['accuracy']:.4f}")
     st.write(f"Precision (Macro Average): {results['precision']:.4f}")
@@ -224,7 +226,7 @@ def display_classification_results(results):
     if results['roc_auc']:
         st.write(f"ROC AUC Score (Macro Average, OVO): {results['roc_auc']:.4f}")
     
-
+# Function to display clustering results
 
 
 
@@ -236,19 +238,19 @@ def feature_visualization(data):
 
     if feature:
         if data[feature].dtype == 'object':
-           
+            # Count Plot for categorical feature
             fig, ax = plt.subplots(figsize=(8, 6))
             sns.countplot(data=data, x=feature, ax=ax)
             ax.set_title(f"Count Plot for Categorical Feature {feature}")
             st.pyplot(fig)
         else:
-          
+            # Density Plot for numerical feature
             fig, ax = plt.subplots(figsize=(8, 6))
             sns.kdeplot(data[feature], fill=True, ax=ax)
             ax.set_title(f"Density Plot for Numerical Feature {feature}")
             st.pyplot(fig)
 
-            
+            # Dot Plot for numerical feature
             fig, ax = plt.subplots(figsize=(8, 6))
             sns.stripplot(x=data[target_variable], y=data[feature], ax=ax)
             ax.set_title(f"Dot Plot for Numerical Feature {feature} by {target_variable}")
@@ -281,7 +283,7 @@ def compare_clustering_algorithms(X, y_true):
 
     results = {}
     for name, alg in algorithms.items():
-        model, clusters = perform_clustering(name, X, n_clusters=3) 
+        model, clusters = perform_clustering(name, X, n_clusters=3)  # Use 3 clusters for comparison
         results[name] = evaluate_clustering(X, clusters, y_true)
 
     best_algorithm = max(results, key=lambda k: results[k]["silhouette_score"])
@@ -331,6 +333,7 @@ st.title("Web App για αξιολόγιση και visualize αλγορίθμ�
 
 
 
+# Sidebar for data file upload
 uploaded_file = st.sidebar.file_uploader("Ανέβασε το CSV file", type=["csv"])
 
 if uploaded_file:
@@ -349,192 +352,128 @@ if uploaded_file:
             # Display the updated data table with the target variable moved to the last position
             display_data_table(data, target_variable)
 
-            tabs = st.tabs(["PCA", "t-SNE", "Feature Visualization", "Results", "Info"])
+            tabs = st.tabs(["PCA", "t-SNE", "Feature Visualization", "Results","Info"])
 
             with tabs[0]:
                 st.header("PCA Visualization")
-
-                def pca_visualization(data, target_variable=None):
-                    data.columns = data.columns.str.strip()
-                    features = data.columns.drop(target_variable) if target_variable else data.columns
-                    numeric_features = data[features].select_dtypes(include=np.number)
-                    categorical_features = data[features].select_dtypes(exclude=np.number)
-
-                    numeric_transformer = StandardScaler()
-                    categorical_transformer = OneHotEncoder(handle_unknown='ignore')
-
-                    preprocessor = ColumnTransformer(
-                        transformers=[
-                            ('num', numeric_transformer, numeric_features.columns),
-                            ('cat', categorical_transformer, categorical_features.columns)])
-
-                    X = preprocessor.fit_transform(data[features])
-
-                    pca = PCA(n_components=2)
-                    principal_components = pca.fit_transform(X)
-
-                    principal_df = pd.DataFrame(data=principal_components, columns=['PC1', 'PC2'])
-
-                    if target_variable:
-                        principal_df['target'] = data[target_variable]
-                        targets = principal_df['target'].unique()
-
-                        colors = sns.color_palette("tab20", len(targets)) if len(targets) <= 20 else sns.color_palette("tab20b", len(targets))
-
-                        fig, ax = plt.subplots(figsize=(8, 8))
-                        ax.set_xlabel('PC1', fontsize=15)
-                        ax.set_ylabel('PC2', fontsize=15)
-                        ax.set_title('2 Component PCA', fontsize=20)
-
-                        for target_value, color in zip(targets, colors):
-                            indices_to_keep = principal_df['target'] == target_value
-                            ax.scatter(principal_df.loc[indices_to_keep, 'PC1'],
-                                       principal_df.loc[indices_to_keep, 'PC2'],
-                                       c=[color], s=50, label=target_value)
-
-                        ax.legend()
-                    else:
-                        fig, ax = plt.subplots(figsize=(8, 8))
-                        ax.set_xlabel('PC1', fontsize=15)
-                        ax.set_ylabel('PC2', fontsize=15)
-                        ax.set_title('2 Component PCA', fontsize=20)
-                        ax.scatter(principal_df['PC1'], principal_df['PC2'], c='blue', s=50, label='Data')
-
-                    ax.grid()
-                    st.pyplot(fig)
-
+               
                 pca_visualization(data, target_variable)
 
             with tabs[1]:
                 st.header("t-SNE Visualization")
-                
-                def t_sne_visualization(data, target_variable=None, perplexity=30, learning_rate=200):
-                    data.columns = data.columns.str.strip()
-                    features = data.columns.drop(target_variable) if target_variable else data.columns
-                    numeric_features = data[features].select_dtypes(include=np.number)
-                    categorical_features = data[features].select_dtypes(exclude=np.number)
-
-                    numeric_transformer = StandardScaler()
-                    categorical_transformer = OneHotEncoder(handle_unknown='ignore', drop='if_binary')
-
-                    preprocessor = ColumnTransformer(
-                        transformers=[
-                            ('num', numeric_transformer, numeric_features.columns),
-                            ('cat', categorical_transformer, categorical_features.columns)])
-
-                    X = preprocessor.fit_transform(data[features])
-
-                    tsne = TSNE(n_components=2, perplexity=perplexity, learning_rate=learning_rate, random_state=42)
-                    tsne_components = tsne.fit_transform(X)
-
-                    tsne_df = pd.DataFrame(data=tsne_components, columns=['t-SNE1', 't-SNE2'])
-
-                    if target_variable:
-                        tsne_df['target'] = data[target_variable]
-                        targets = tsne_df['target'].unique()
-                        colors = sns.color_palette("tab10", len(targets))
-
-                        fig, ax = plt.subplots(figsize=(8, 8))
-                        ax.set_xlabel('t-SNE1', fontsize=15)
-                        ax.set_ylabel('t-SNE2', fontsize=15)
-                        ax.set_title('2 Component t-SNE', fontsize=20)
-
-                        for target, color in zip(targets, colors):
-                            indices_to_keep = tsne_df['target'] == target
-                            ax.scatter(tsne_df.loc[indices_to_keep, 't-SNE1'],
-                                       tsne_df.loc[indices_to_keep, 't-SNE2'],
-                                       c=[color], s=50, label=target)
-
-                        ax.legend()
-                    else:
-                        fig, ax = plt.subplots(figsize=(8, 8))
-                        ax.set_xlabel('t-SNE1', fontsize=15)
-                        ax.set_ylabel('t-SNE2', fontsize=15)
-                        ax.set_title('2 Component t-SNE', fontsize=20)
-                        ax.scatter(tsne_df.loc[indices_to_keep, 't-SNE1'],
-                        tsne_df.loc[indices_to_keep, 't-SNE2'],
-                        c=[color], s=50, label=target)
-
-                    ax.grid()
-                    st.pyplot(fig)
-
-                perplexity = st.slider("Perplexity", min_value=5, max_value=50, value=30, step=5)
-                learning_rate = st.slider("Learning Rate", min_value=10, max_value=1000, value=200, step=10)
-
+                perplexity = st.slider("Perplexity", min_value=5, max_value=50, value=30, key="tsne_perplexity_slider")
+                learning_rate = st.slider("Learning Rate", min_value=10, max_value=1000, value=200, key="tsne_learning_rate_slider")
                 t_sne_visualization(data, target_variable, perplexity, learning_rate)
 
             with tabs[2]:
                 st.header("Feature Visualization")
-                st.write("Επέλεξε feature για visualize.")
+                feature_visualization(data)
 
-                features_to_visualize = st.multiselect("Δίαλεξε features", options=data.columns)
-                target = st.selectbox("Διάλεξε την μεταβλητή που θες να κάνεις visualization", options=[None] + list(data.columns))
-
-                if features_to_visualize:
-                    for feature in features_to_visualize:
-                        fig, ax = plt.subplots()
-                        if target:
-                            sns.boxplot(x=data[target], y=data[feature], ax=ax)
-                        else:
-                            sns.histplot(data[feature], kde=True, ax=ax)
-                        ax.set_title(f"Distribution of {feature}")
-                        st.pyplot(fig)
-
+            # Results Tab
             with tabs[3]:
-                st.header("Αποτελέσματα και σύγκριση μοντέλων")
+                
+                features = data.columns.drop(target_variable)
+                numeric_features = data[features].select_dtypes(include=np.number)
+                categorical_features = data[features].select_dtypes(exclude=np.number)
 
-                if target_variable:
-                    st.write("## Μοντέλα classification")
-                    classifiers = {
-                        "Random Forest": RandomForestClassifier(),
-                        "K-Nearest Neighbors": KNeighborsClassifier(),
-                        "Decision Tree": DecisionTreeClassifier()
-                    }
-                    classifier_name = st.selectbox("Διάλεξε Classifier", classifiers.keys())
+                numeric_transformer = StandardScaler()
+                categorical_transformer = OneHotEncoder(handle_unknown='ignore', drop='if_binary')
 
-                    X = data.drop(columns=[target_variable])
-                    y = data[target_variable]
+                preprocessor = ColumnTransformer(
+                    transformers=[
+                        ('num', numeric_transformer, numeric_features.columns),
+                        ('cat', categorical_transformer, categorical_features.columns)])
 
-                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+                X = preprocessor.fit_transform(data[features])
+                y = data[target_variable]
 
-                    model = classifiers[classifier_name]
-                    model.fit(X_train, y_train)
-                    y_pred = model.predict(X_test)
+                # Train-test split
+                X_train, X_test, y_train, y_test = split_data(X, y)
 
-                    st.write(f"### {classifier_name} Results")
-                    st.write(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
-                    st.write(f"Precision: {precision_score(y_test, y_pred, average='weighted'):.2f}")
-                    st.write(f"Recall: {recall_score(y_test, y_pred, average='weighted'):.2f}")
-                    st.write(f"F1 Score: {f1_score(y_test, y_pred, average='weighted'):.2f}")
+                # --- Individual Classifier Selection and Evaluation ---
+                st.subheader("Classification")
+                st.write("Όρισε τις παραμέτρους ταξινόμισης:")
+                classifier_name = st.selectbox("Διάλεξε Classifier", ["K-Nearest Neighbors (KNN)", "Decision Tree"], key="classifier_selectbox")
 
-                    st.write("## Clustering Models")
-                    clustering_models = {
-                        "K-Means": KMeans(n_clusters=3),
-                        "Agglomerative Clustering": AgglomerativeClustering(n_clusters=3)
-                    }
-                    clustering_name = st.selectbox("Διάλεξε Clustering Model", clustering_models.keys())
+                # Initialize classification_results here
+                classification_results = None
 
-                    clustering_model = clustering_models[clustering_name]
-                    clustering_model.fit(X)
 
-                    labels = clustering_model.labels_
-                    st.write(f"### {clustering_name} Results")
-                    st.write(f"Silhouette Score: {silhouette_score(X, labels):.2f}")
-                    st.write(f"Calinski-Harabasz Score: {calinski_harabasz_score(X, labels):.2f}")
-                    st.write(f"Davies-Bouldin Score: {davies_bouldin_score(X, labels):.2f}")
+                if classifier_name == "K-Nearest Neighbors (KNN)":
+                    n_neighbors = st.number_input("Number of Neighbors (K)", min_value=1, value=5, key="knn_neighbors_input")
+                    weights = st.selectbox("Weights", ['uniform', 'distance'], key="knn_weights_selectbox")
+                    classifier = KNeighborsClassifier(n_neighbors=n_neighbors, weights=weights)
+                else:
+                    max_depth = st.number_input("Maximum Depth", min_value=1, value=5, key="dt_max_depth_input")
+                    criterion = st.selectbox("Criterion", ['gini', 'entropy'], key="dt_criterion_selectbox")
+                    classifier = DecisionTreeClassifier(max_depth=max_depth, criterion=criterion)
 
-            with tabs[4]:
-                st.header("Info")
-                st.write( """
+                # Train and evaluate classifier
+               
+                classification_results = train_and_evaluate_classifier(classifier, X_train, y_train, X_test, y_test)
+
+                # Display classification results
+                st.subheader("Αποτελέσματα Classification ")
+                display_classification_results(classification_results)
+
+                # Clustering
+                st.subheader("Clustering")
+                st.write("Όρισε τις παραμέτρους Clustering:")
+                algorithm = st.selectbox("Διάλεξε Clustering Algorithm", ["KMeans", "Agglomerative Clustering"], key="clustering_algorithm_selectbox")
+
+                # Algorithm-specific parameters
+                if algorithm == "KMeans":
+                    n_clusters = st.number_input("Number of Clusters (K) for K-Means", min_value=2, value=3, key="n_clusters_kmeans_input")
+                    init = st.selectbox("Initialization Method", ['k-means++', 'random'], key="kmeans_init_selectbox")
+                    clustering_params = {"n_clusters": n_clusters, "init": init, "random_state": 42}
+                else:
+                    n_clusters = st.number_input("Number of Clusters (K) for Agglomerative", min_value=2, value=3, key="n_clusters_agg_input")
+                    linkage = st.selectbox("Linkage", ['ward', 'complete', 'average', 'single'], key="agg_linkage_selectbox")
+                    clustering_params = {"n_clusters": n_clusters, "linkage": linkage}
+
+                # Perform clustering
+               
+                clustering_model, clusters = perform_clustering(algorithm, X, **clustering_params) 
+                clustering_results = evaluate_clustering(X, clusters, y)
+
+                # Display clustering results
+                st.subheader("Αποτελέσματα Clustering ")
+                display_clustering_results(clustering_results)
+
+                # Comparison section
+                st.header("Σύγκριση Αποτελεσμάτων")
+                st.write("Σύγκριση Επίδοσης Αλγορίθμων")
+                
+                # --- Classification Comparison ---
+                
+                compare_classifiers(X_train, y_train, X_test, y_test)
+
+                # --- Clustering Comparison ---
+                compare_clustering_algorithms(X, y)
+                # Compare classification and clustering
+                if classification_results["accuracy"] > clustering_results["silhouette_score"]:
+                    st.write("Η μέθοδος Classification  απέδωσε καλύτερ accuracy ", classification_results["accuracy"])
+                else:
+                    st.write("Η μέθοδος Clustering απέδωσε καλύτερα με silhouette score of ", clustering_results["silhouette_score"])
+               
+        
+        with tabs[4]:  # Index 4 for the "Info" tab
+                   st.header("Σχετικά με αυτή την Εφαρμογή")
+                   st.write(
+                      """
         Αυτή η εφαρμογή έχει σχεδιαστεί για την οπτικοποίηση και αξιολόγηση μοντέλων μηχανικής μάθησης αλγορίθμων ταξινόμησης και ομαδοποίησης. 
         Παρέχει εργαλεία για την εξερεύνηση δεδομένων (PCA και t-SNE), την οπτικοποίηση χαρακτηριστικών και τη σύγκριση μοντέλων.
-        """)
-                st.write("### Πώς Λειτουργεί:")
-                st.write("""
-                   Η εφαρμογή αποτελείται από 4 καρτέλες (tabs), καθεμία από τις οποίες παρέχει διαφορετική λειτουργικότητα.
+        """
+    )
+
+    st.subheader("Πώς Λειτουργεί")
+    st.write(
+        """
+        Η εφαρμογή αποτελείται από 4 καρτέλες (tabs), καθεμία από τις οποίες παρέχει διαφορετική λειτουργικότητα.
        ### Sidebar: Φόρτωση Δεδομένων
         - **Περιγραφή:** Σε αυτή την καρτέλα μπορείτε να ανεβάσετε το σύνολο δεδομένων σας σε μορφή CSV.
-        - **Πώς Λειτουργεί:** Απλά επιλέξτε το αρχείο σας και η εφαρμογή θα φορτώσει και θα εμφανίσει τα δεδομένα στον πίνακα. Βεβαιωθείτε ότι το σύνολο δεδομένων σας είναι καθαρό και σωστά μορφοποιημένο πριν το ανεβάσετε.Ο χρήστης στην επιλογή μεταβλητής στόχου θα πρέπει να επιλέξει την μεταβλητή κλάσης.Η λειτουγεία αυτή εξασφαλίζει την σωστή ταξινόμιση και την απαίτηση του ζητούμενου η μεταβλητή στόχος να βρίσκεται στην θέση [f+1] του νέου πίνακα(σε πολλά dataset η μεταβλητή στόχος βρίσκεται σε τυχαία θέση f).
+        - **Πώς Λειτουργεί:** Απλά επιλέξτε το αρχείο σας και η εφαρμογή θα φορτώσει και θα εμφανίσει τα δεδομένα στον πίνακα. Βεβαιωθείτε ότι το σύνολο δεδομένων σας είναι καθαρό και σωστά μορφοποιημένο πριν το ανεβάσετε.
+
         ### Tab 2: PCA Ανάλυση
         - **Περιγραφή:** Χρησιμοποιήστε την ανάλυση PCA για να δείτε πώς φαίνονται τα δεδομένα σας σε δύο κύριες συνιστώσες.
         - **Πώς Λειτουργεί:**
@@ -575,8 +514,12 @@ if uploaded_file:
         - **Πώς Λειτουργεί:**
           - **Επιλογή Μοντέλων:** Επιλέξτε τα μοντέλα που θέλετε να συγκρίνετε.
           - **Σύγκριση:** Δείτε συγκριτικά αποτελέσματα όπως η ακρίβεια και άλλες μετρήσεις απόδοσης για κάθε μοντέλο.
-        
-          ### Tab 8: Χαρακτηριστικά 
+        """
+    )
+
+    st.subheader("Χαρακτηριστικά")
+    st.write(
+        """
         - **Φόρτωση και Εμφάνιση Δεδομένων:** Ανεβάστε αρχεία CSV και δείτε το σύνολο δεδομένων.
         - **Οπτικοποίηση PCA:** Δείτε πώς φαίνονται τα δεδομένα σας σε δύο κύριες συνιστώσες.
         - **Οπτικοποίηση t-SNE:** Λάβετε μια μη γραμμική προβολή των δεδομένων σας.
@@ -584,26 +527,27 @@ if uploaded_file:
         - **Ταξινόμηση:** Εκπαιδεύστε και αξιολογήστε μοντέλα ταξινόμησης όπως KNN και Δέντρο Αποφάσεων.
         - **Ομαδοποίηση:** Εκτελέστε ομαδοποίηση με KMeans και Ιεραρχική Ομαδοποίηση και αξιολογήστε τα αποτελέσματα.
         - **Σύγκριση Μοντέλων:** Συγκρίνετε διάφορους αλγορίθμους για να βρείτε τον καλύτερο απόδοσης μοντέλο.
-        
-          ### Tab 9:Συμβουλές για τη Χρήση της Εφαρμογής
+        """
+    )
+
+    st.subheader("Συμβουλές για τη Χρήση της Εφαρμογής")
+    st.write(
+        """
         - Βεβαιωθείτε ότι το σύνολο δεδομένων σας είναι καθαρό και σωστά μορφοποιημένο πριν το ανεβάσετε.
         - Επιλέξτε την κατάλληλη μεταβλητή στόχου για την ανάλυσή σας.
         - Χρησιμοποιήστε τους ρυθμιστές και τα κουμπιά επιλογής για να προσαρμόσετε τις παραμέτρους του μοντέλου για καλύτερα αποτελέσματα.
         - Συγκρίνετε τα αποτελέσματα διαφορετικών μοντέλων για να λάβετε μια τεκμηριωμένη απόφαση.
-                      
-          ### Tab 10:Ομάδα Ανάπτυξης
-        Αυτή η εφαρμογή αναπτύχθηκε από:
-
-        * **Μέλος Ομάδας 1:** Μπάρλα Ιωάννη, ΑΜ Π2019009 
-           
         """
-                                       
-                         
- 
- 
     )
 
+    st.subheader("Ομάδα Ανάπτυξης")
+    st.write(
+        """
+        Αυτή η εφαρμογή αναπτύχθηκε από:
 
-    
-    
-       
+        * **Μέλος Ομάδας 1:** 
+            - Υλοποίησε τη φόρτωση και προεπεξεργασία δεδομένων.
+            - Ανέπτυξε τα εργαλεία οπτικοποίησης PCA και t-SNE.
+        * **Μέλος Ομάδας 2:**
+        """
+    )
