@@ -9,4 +9,18 @@ A streamlit Web App for Data Minning
 #### 4.docker run -p 8501:8501 my-streamlit-app
 
 ## IMAGES FROM WEB APP
-![Image1]()
+![Image1](images/src1.png)
+![Image2](images/src2.png)
+![Image3](images/src3.png)
+![Image4](images/src4.png)
+![Image5](images/src5.png)
+![Image12](images/src12.png)
+![Image13](images/src13.png)
+
+
+
+
+
+
+
+
