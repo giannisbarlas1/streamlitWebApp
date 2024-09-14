@@ -12,7 +12,7 @@ A streamlit Web App for Data Analysis
 ![Image1](images/icon1.png)
 ![Image2](images/icon2.png)
 ![Image3](images/icon3.png)
-![Image4](images/icon5.png)
+![Image4](images/icon40.png)
 ![Image5](images/icon6.png)
 ![Image12](images/icon7.png)
 ![Image13](images/icon8.png)
