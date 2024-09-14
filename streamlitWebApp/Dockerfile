@@ -1,7 +1,11 @@
+FROM python:3.8-slim
 
-FROM python:3.9
+
 WORKDIR /app
 COPY . /app
+
+# Εγκατάσταση των εξαρτήσεων
 RUN pip install -r requirements.txt
-EXPOSE 8501
-CMD ["streamlit", "run", "app.py"]
+
+# Εκκίνηση της εφαρμογής Streamlit
+CMD ["streamlit", "run", "app.py", "--server.port=8000", "--server.address=0.0.0.0"]
