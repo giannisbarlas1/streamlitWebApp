@@ -1,8 +1,9 @@
-# Streamlit Web App Επί πτυχίω
-A streamlit Web App for Data Minning
+# Streamlit Web App Μπάρλας Ιωάννης Π2019009 Επί πτυχίω
+A streamlit Web App for Data Analysis
 
 
-## Docker installation
+## Docker installation 
+### For docker installation use the commands below
 #### 1.git clone 
 #### 2.open terminal 
 #### 3. docker build -t my-streamlit-app .
