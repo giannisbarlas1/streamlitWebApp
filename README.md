@@ -3,11 +3,10 @@ A streamlit Web App for Data Analysis
 
 
 ## Docker installation 
-### For docker installation use the commands below
-#### 1.git clone 
-#### 2.open terminal 
-#### 3. docker build -t my-streamlit-app .
-#### 4.docker run -p 8501:8501 my-streamlit-app
+### Η εφαρμογή έχει αναρτηθεί στο docker hub.Για να την αποκτήσετε μέσω docker θα χρειαστουύν τα παρακάτω commands
+#### docker pull p19barl/myapp:latest
+#### docker run -p 8000:8000 p19barl/myapp:latest
+
 
 ## IMAGES FROM WEB APP
 ![Image1](images/icon1.png)
