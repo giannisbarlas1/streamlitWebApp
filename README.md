@@ -10,13 +10,13 @@ A streamlit Web App for Data Analysis
 #### 4.docker run -p 8501:8501 my-streamlit-app
 
 ## IMAGES FROM WEB APP
-![Image1](images/src1.png)
-![Image2](images/src2.png)
-![Image3](images/src3.png)
-![Image4](images/src4.png)
-![Image5](images/src5.png)
-![Image12](images/src12.png)
-![Image13](images/src13.png)
+![Image1](images/icon1.png)
+![Image2](images/icon2.png)
+![Image3](images/icon3.png)
+![Image4](images/icon5.png)
+![Image5](images/icon6.png)
+![Image12](images/icon7.png)
+![Image13](images/icon8.png)
 
 
 
