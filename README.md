@@ -3,7 +3,7 @@ A streamlit Web App for Data Analysis
 
 
 ## Docker installation 
-### Η εφαρμογή έχει αναρτηθεί στο docker hub.Για να την αποκτήσετε μέσω docker θα χρειαστουύν τα παρακάτω commands
+### Η εφαρμογή έχει αναρτηθεί στο docker hub.Για να την αποκτήσετε μέσω docker θα χρειαστούν τα παρακάτω commands
 #### docker pull p19barl/myapp:latest
 #### docker run -p 8000:8000 p19barl/myapp:latest
 
