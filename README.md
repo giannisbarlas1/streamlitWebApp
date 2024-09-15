@@ -1,5 +1,5 @@
 # Streamlit Web App Μπάρλας Ιωάννης Π2019009 Επί πτυχίω
-A streamlit Web App for Data Analysis
+A streamlit Web App for Data Analysis for categorical class output datasets
 
 
 ## Docker installation 
